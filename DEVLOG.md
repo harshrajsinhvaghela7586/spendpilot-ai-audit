@@ -52,3 +52,34 @@
 * Implement real pricing data
 * Build audit recommendation engine
 * Add charts and savings visualization
+
+ ## Day 3 — 2026-05-22
+
+**Hours worked:** 7
+
+**What I did:**
+- Implemented a production-style AI spend audit workflow
+- Added real-world pricing datasets for ChatGPT, Claude, Cursor, GitHub Copilot, and Gemini
+- Built a deterministic audit recommendation engine with savings calculations
+- Improved the landing page UI and added comparison dashboards
+- Added persistent form state using localStorage
+- Added animated audit results and optimization insights
+- Configured CI pipeline using GitHub Actions
+- Added automated audit-engine tests using Vitest
+- Created engineering documentation including PRICING_DATA.md, ARCHITECTURE.md, TESTS.md, and PROMPTS.md
+- Deployed the project to Vercel
+
+**What I learned:**
+- Real pricing normalization across vendors is harder than expected because every provider structures plans differently
+- Deterministic audit logic is more trustworthy than fully AI-generated financial recommendations
+- Lighthouse performance optimization on mobile requires careful control of animations and rendering
+
+**Blockers / what I'm stuck on:**
+- Mobile Lighthouse score dropped initially due to browser extension interference and heavier UI rendering
+- Still need to implement backend lead capture and shareable audit URLs
+
+**Plan for tomorrow:**
+- Integrate Firebase backend for lead capture
+- Add AI-generated personalized audit summaries
+- Implement shareable audit report URLs
+- Improve Lighthouse accessibility score above 90
