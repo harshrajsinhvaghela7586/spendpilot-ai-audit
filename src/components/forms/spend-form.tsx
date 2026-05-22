@@ -3,27 +3,50 @@
 import { useEffect, useState } from "react";
 import { generateAudit } from "@/lib/audit-engine";
 
+type AuditResult = {
+  severity: "high" | "medium" | "low";
+  recommendation: string;
+  optimizedPlan: string;
+  savings: number;
+  annualSavings: number;
+  reason: string;
+};
+
 export default function SpendForm() {
 
-  const [tool, setTool] = useState("ChatGPT");
-  const [plan, setPlan] = useState("Plus");
-  const [monthlySpend, setMonthlySpend] = useState("");
-  const [teamSize, setTeamSize] = useState("");
-  const [result, setResult] = useState<any>(null);
+  // INITIAL STATE WITH LOCAL STORAGE
 
-  useEffect(() => {
+  const [tool, setTool] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("tool") || "ChatGPT";
+    }
+    return "ChatGPT";
+  });
 
-    const savedTool = localStorage.getItem("tool");
-    const savedPlan = localStorage.getItem("plan");
-    const savedSpend = localStorage.getItem("monthlySpend");
-    const savedTeam = localStorage.getItem("teamSize");
+  const [plan, setPlan] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("plan") || "Plus";
+    }
+    return "Plus";
+  });
 
-    if (savedTool) setTool(savedTool);
-    if (savedPlan) setPlan(savedPlan);
-    if (savedSpend) setMonthlySpend(savedSpend);
-    if (savedTeam) setTeamSize(savedTeam);
+  const [monthlySpend, setMonthlySpend] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("monthlySpend") || "";
+    }
+    return "";
+  });
 
-  }, []);
+  const [teamSize, setTeamSize] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("teamSize") || "";
+    }
+    return "";
+  });
+
+  const [result, setResult] = useState<AuditResult | null>(null);
+
+  // SAVE TO LOCAL STORAGE
 
   useEffect(() => {
 
@@ -34,21 +57,27 @@ export default function SpendForm() {
 
   }, [tool, plan, monthlySpend, teamSize]);
 
+  // HANDLE AUDIT
+
   const handleAudit = () => {
 
     const audit = generateAudit(
       tool,
       Number(monthlySpend),
       Number(teamSize)
-    );
+    ) as AuditResult;
 
     setResult(audit);
   };
 
   return (
+
     <div className="bg-[#0f172a] border border-white/10 rounded-[32px] p-8 md:p-10 shadow-2xl">
 
+      {/* HEADER */}
+
       <div className="mb-8">
+
         <h2 className="text-4xl font-bold">
           AI Spend Audit
         </h2>
@@ -56,13 +85,17 @@ export default function SpendForm() {
         <p className="text-slate-400 mt-3 text-lg">
           Analyze your subscriptions, plans, and usage patterns.
         </p>
+
       </div>
+
+      {/* FORM */}
 
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* Tool */}
+        {/* TOOL */}
 
         <div>
+
           <label className="block mb-3 text-sm text-slate-300">
             AI Tool
           </label>
@@ -78,11 +111,13 @@ export default function SpendForm() {
             <option>Copilot</option>
             <option>Gemini</option>
           </select>
+
         </div>
 
-        {/* Plan */}
+        {/* PLAN */}
 
         <div>
+
           <label className="block mb-3 text-sm text-slate-300">
             Current Plan
           </label>
@@ -98,11 +133,13 @@ export default function SpendForm() {
             <option>Business</option>
             <option>Enterprise</option>
           </select>
+
         </div>
 
-        {/* Spend */}
+        {/* MONTHLY SPEND */}
 
         <div>
+
           <label className="block mb-3 text-sm text-slate-300">
             Monthly Spend ($)
           </label>
@@ -114,11 +151,13 @@ export default function SpendForm() {
             placeholder="250"
             className="w-full bg-[#020617] border border-white/10 rounded-2xl px-5 py-4 outline-none"
           />
+
         </div>
 
-        {/* Team */}
+        {/* TEAM SIZE */}
 
         <div>
+
           <label className="block mb-3 text-sm text-slate-300">
             Team Size
           </label>
@@ -130,9 +169,12 @@ export default function SpendForm() {
             placeholder="5"
             className="w-full bg-[#020617] border border-white/10 rounded-2xl px-5 py-4 outline-none"
           />
+
         </div>
 
       </div>
+
+      {/* BUTTON */}
 
       <button
         onClick={handleAudit}
@@ -147,7 +189,7 @@ export default function SpendForm() {
 
         <div className="mt-8 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6">
 
-          {/* Severity */}
+          {/* SEVERITY */}
 
           <div
             className={`inline-flex px-4 py-2 rounded-full text-sm font-medium mb-6 ${
@@ -158,11 +200,13 @@ export default function SpendForm() {
                 : "bg-green-500/10 text-green-400 border border-green-500/20"
             }`}
           >
+
             {result.severity === "high"
               ? "High Savings Opportunity"
               : result.severity === "medium"
               ? "Optimization Opportunity"
               : "Well Optimized"}
+
           </div>
 
           <h3 className="text-3xl font-bold mb-6">
@@ -171,7 +215,7 @@ export default function SpendForm() {
 
           <div className="space-y-5">
 
-            {/* Recommendation */}
+            {/* RECOMMENDATION */}
 
             <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
@@ -185,7 +229,7 @@ export default function SpendForm() {
 
             </div>
 
-            {/* Optimized Plan */}
+            {/* OPTIMIZED PLAN */}
 
             <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
@@ -199,7 +243,7 @@ export default function SpendForm() {
 
             </div>
 
-            {/* Savings */}
+            {/* SAVINGS */}
 
             <div className="grid md:grid-cols-2 gap-4">
 
@@ -229,7 +273,7 @@ export default function SpendForm() {
 
             </div>
 
-            {/* Reason */}
+            {/* REASON */}
 
             <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
