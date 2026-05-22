@@ -1,236 +1,273 @@
-export const pricingData = {
-  ChatGPT: {
-    free: 0,
-    plus: 24,
-    pro: 128,
-    business: 22,
-    enterprise: 39,
-  },
+import { pricing } from "@/data/pricing";
 
-  Claude: {
-    free: 0,
-    pro: 17,
-    max: 100,
-    team: 20,
-    enterprise: 35,
-  },
-
-  Cursor: {
-    hobby: 0,
-    pro: 20,
-    teams: 40,
-    enterprise: 60,
-  },
-
-  Copilot: {
-    free: 0,
-    pro: 10,
-    proPlus: 39,
-    business: 19,
-    enterprise: 39,
-  },
-
-  Gemini: {
-    plus: 5,
-    pro: 24,
-    ultra: 78,
-  },
-};
+export interface AuditResult {
+  recommendation: string;
+  savings: number;
+  annualSavings: number;
+  reason: string;
+  severity: "low" | "medium" | "high";
+  optimizedPlan: string;
+}
 
 export function generateAudit(
   tool: string,
   monthlySpend: number,
   teamSize: number
-) {
+): AuditResult {
 
-  const pricing = pricingData[tool as keyof typeof pricingData];
-
-  let optimizedPlan = "";
-  let optimizedCost = 0;
-  let recommendation = "";
-  let reason = "";
+  // =========================
+  // CHATGPT
+  // =========================
 
   if (tool === "ChatGPT") {
 
-    if (teamSize >= 5) {
+    if (teamSize <= 2 && monthlySpend > 60) {
 
-      optimizedPlan = "Business";
-      optimizedCost = pricing.business * teamSize;
+      const optimized = pricing.chatgpt.plus * teamSize;
+      const savings = monthlySpend - optimized;
 
-      recommendation =
-        "Switch from individual subscriptions to ChatGPT Business";
+      return {
+        recommendation: "Downgrade to ChatGPT Plus",
 
-      reason =
-        "Business plans provide centralized billing, better collaboration, and significantly lower per-seat pricing for growing teams.";
+        optimizedPlan: "ChatGPT Plus",
 
-    } else if (monthlySpend > 100) {
+        savings,
 
-      optimizedPlan = "Pro";
-      optimizedCost = pricing.pro;
+        annualSavings: savings * 12,
 
-      recommendation =
-        "Consolidate into a single ChatGPT Pro workflow";
+        reason:
+          "Small teams are frequently over-provisioned with business or high-tier subscriptions despite having lightweight AI workloads.",
 
-      reason =
-        "Your spending pattern suggests overlapping subscriptions and underutilized premium features.";
+        severity: "high",
+      };
+    }
 
-    } else {
+    if (monthlySpend > 200) {
 
-      optimizedPlan = "Plus";
-      optimizedCost = pricing.plus;
+      return {
+        recommendation: "Consolidate Pro subscriptions",
 
-      recommendation =
-        "ChatGPT Plus is the most cost-efficient setup";
+        optimizedPlan: "ChatGPT Business",
 
-      reason =
-        "Your current workload fits comfortably within ChatGPT Plus usage limits.";
+        savings: 50,
+
+        annualSavings: 600,
+
+        reason:
+          "Your organization may be paying for overlapping premium plans without centralized seat optimization.",
+
+        severity: "medium",
+      };
     }
   }
+
+  // =========================
+  // CLAUDE
+  // =========================
 
   if (tool === "Claude") {
 
-    if (teamSize >= 5) {
+    if (teamSize <= 3 && monthlySpend > 70) {
 
-      optimizedPlan = "Claude Team";
-      optimizedCost = pricing.team * teamSize;
+      const optimized = pricing.claude.pro * teamSize;
 
-      recommendation =
-        "Move your team to Claude Team";
+      return {
+        recommendation: "Switch to Claude Pro",
 
-      reason =
-        "Claude Team unlocks shared collaboration, centralized management, and lower cost scaling for multi-user environments.";
+        optimizedPlan: "Claude Pro",
 
-    } else if (monthlySpend > 80) {
+        savings:
+          monthlySpend - optimized,
 
-      optimizedPlan = "Claude Max";
-      optimizedCost = pricing.max;
+        annualSavings:
+          (monthlySpend - optimized) * 12,
 
-      recommendation =
-        "Upgrade heavy workloads to Claude Max";
+        reason:
+          "Claude Team and Max plans are often excessive for smaller engineering teams without shared administration requirements.",
 
-      reason =
-        "Your usage pattern indicates advanced reasoning and higher throughput requirements.";
-    } else {
+        severity: "high",
+      };
+    }
 
-      optimizedPlan = "Claude Pro";
-      optimizedCost = pricing.pro;
+    if (monthlySpend >= 100) {
 
-      recommendation =
-        "Claude Pro offers the best balance";
+      return {
+        recommendation: "Reduce Claude Max dependency",
 
-      reason =
-        "Your usage aligns well with Claude Pro’s higher limits and research capabilities.";
+        optimizedPlan: "Claude Pro",
+
+        savings: 40,
+
+        annualSavings: 480,
+
+        reason:
+          "Claude Max pricing is optimized for extremely heavy workloads and often exceeds actual productivity gains for moderate users.",
+
+        severity: "medium",
+      };
     }
   }
+
+  // =========================
+  // CURSOR
+  // =========================
 
   if (tool === "Cursor") {
 
-    if (teamSize >= 5) {
+    if (teamSize <= 3 && monthlySpend > 80) {
 
-      optimizedPlan = "Cursor Teams";
-      optimizedCost = pricing.teams * teamSize;
+      const optimized =
+        pricing.cursor.individualMonthly * teamSize;
 
-      recommendation =
-        "Adopt Cursor Teams for engineering collaboration";
+      return {
+        recommendation: "Move to Cursor Individual",
 
-      reason =
-        "Shared context, team rules, and centralized billing improve productivity and reduce duplicated subscriptions.";
+        optimizedPlan: "Cursor Individual",
 
-    } else {
+        savings:
+          monthlySpend - optimized,
 
-      optimizedPlan = "Cursor Pro";
-      optimizedCost = pricing.pro;
+        annualSavings:
+          (monthlySpend - optimized) * 12,
 
-      recommendation =
-        "Cursor Pro is the optimal developer setup";
+        reason:
+          "Cursor Teams pricing is usually unnecessary for smaller developer teams without centralized context sharing.",
 
-      reason =
-        "The Pro plan provides strong coding capabilities without unnecessary enterprise overhead.";
+        severity: "high",
+      };
+    }
+
+    if (monthlySpend > 150) {
+
+      return {
+        recommendation: "Optimize Cursor seat allocation",
+
+        optimizedPlan: "Cursor Teams",
+
+        savings: 60,
+
+        annualSavings: 720,
+
+        reason:
+          "Premium coding seats appear over-allocated across low-usage contributors.",
+
+        severity: "medium",
+      };
     }
   }
+
+  // =========================
+  // COPILOT
+  // =========================
 
   if (tool === "Copilot") {
 
-    if (teamSize >= 5) {
+    if (teamSize <= 5 && monthlySpend > 100) {
 
-      optimizedPlan = "GitHub Copilot Business";
-      optimizedCost = pricing.business * teamSize;
+      const optimized =
+        pricing.copilot.business * teamSize;
 
-      recommendation =
-        "Switch to GitHub Copilot Business";
+      return {
+        recommendation: "Use GitHub Copilot Business",
 
-      reason =
-        "Business plans improve governance, analytics, and organization-wide developer productivity.";
+        optimizedPlan: "Copilot Business",
 
-    } else if (monthlySpend > 30) {
+        savings:
+          monthlySpend - optimized,
 
-      optimizedPlan = "Copilot Pro+";
-      optimizedCost = pricing.proPlus;
+        annualSavings:
+          (monthlySpend - optimized) * 12,
 
-      recommendation =
-        "Upgrade to Copilot Pro+";
+        reason:
+          "Smaller engineering teams generally benefit more from Copilot Business than fragmented Pro+ subscriptions.",
 
-      reason =
-        "Your premium model usage exceeds standard Copilot Pro thresholds.";
+        severity: "high",
+      };
+    }
 
-    } else {
+    if (monthlySpend > 200) {
 
-      optimizedPlan = "Copilot Pro";
-      optimizedCost = pricing.pro;
+      return {
+        recommendation: "Reduce Pro+ dependency",
 
-      recommendation =
-        "Copilot Pro is the best value";
+        optimizedPlan: "Copilot Pro",
 
-      reason =
-        "The Pro tier provides excellent code completion and AI workflow support for individual developers.";
+        savings: 75,
+
+        annualSavings: 900,
+
+        reason:
+          "High-tier Copilot subscriptions are often underutilized relative to their premium request capacity.",
+
+        severity: "medium",
+      };
     }
   }
+
+  // =========================
+  // GEMINI
+  // =========================
 
   if (tool === "Gemini") {
 
-    if (monthlySpend > 70) {
+    if (teamSize <= 3 && monthlySpend > 50) {
 
-      optimizedPlan = "Google AI Ultra";
-      optimizedCost = pricing.ultra;
+      const optimized =
+        pricing.gemini.proMonthly;
 
-      recommendation =
-        "Google AI Ultra best matches your advanced usage";
+      return {
+        recommendation: "Move to Gemini Pro",
 
-      reason =
-        "Your workflow likely depends on higher model access, deep research, and extended multimodal generation.";
+        optimizedPlan: "Gemini Pro",
 
-    } else if (monthlySpend > 20) {
+        savings:
+          monthlySpend - optimized,
 
-      optimizedPlan = "Google AI Pro";
-      optimizedCost = pricing.pro;
+        annualSavings:
+          (monthlySpend - optimized) * 12,
 
-      recommendation =
-        "Google AI Pro provides better optimization";
+        reason:
+          "Gemini Ultra is typically unnecessary for lighter productivity and coding workflows.",
 
-      reason =
-        "Your workload benefits from Gemini Pro reasoning and higher monthly limits.";
+        severity: "medium",
+      };
+    }
 
-    } else {
+    if (monthlySpend > 100) {
 
-      optimizedPlan = "Google AI Plus";
-      optimizedCost = pricing.plus;
+      return {
+        recommendation: "Downgrade Gemini Ultra usage",
 
-      recommendation =
-        "Google AI Plus is the most efficient choice";
+        optimizedPlan: "Gemini Pro",
 
-      reason =
-        "Your usage does not justify upgrading into higher enterprise-grade tiers.";
+        savings: 55,
+
+        annualSavings: 660,
+
+        reason:
+          "Your current Gemini spend suggests premium capacity that may not align with actual utilization.",
+
+        severity: "high",
+      };
     }
   }
 
-  const savings = Math.max(monthlySpend - optimizedCost, 0);
+  // =========================
+  // DEFAULT
+  // =========================
 
   return {
-    optimizedPlan,
-    optimizedCost,
-    recommendation,
-    reason,
-    savings: savings.toFixed(2),
-    annualSavings: (savings * 12).toFixed(2),
+    recommendation: "Current setup looks optimized",
+
+    optimizedPlan: "No changes needed",
+
+    savings: 0,
+
+    annualSavings: 0,
+
+    reason:
+      "No major optimization opportunities were detected in your current AI tooling setup.",
+
+    severity: "low",
   };
 }
