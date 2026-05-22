@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateAudit } from "@/lib/audit-engine";
+import { generateAudit } from "../lib/audit-engine";
 
 describe("Audit Engine", () => {
 
