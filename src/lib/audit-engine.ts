@@ -1,4 +1,4 @@
-import { pricing } from "@/data/pricing";
+import { pricing } from "../data/pricing";
 
 export interface AuditResult {
   recommendation: string;
