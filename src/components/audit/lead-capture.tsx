@@ -2,16 +2,33 @@
 
 import { useState } from "react";
 
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+
+type AuditResult = {
+  savings: number;
+  recommendation: string;
+  optimizedPlan: string;
+};
+
+type LeadCaptureProps = {
+  result: AuditResult;
+  tool: string;
+  monthlySpend: number;
+  teamSize: number;
+};
 
 export default function LeadCapture({
   result,
   tool,
   monthlySpend,
   teamSize,
-}: any) {
+}: LeadCaptureProps) {
 
   const [email, setEmail] = useState("");
 
@@ -62,11 +79,11 @@ export default function LeadCapture({
 
       setSuccess(true);
 
-      setLoading(false);
-
     } catch (error) {
 
       console.error(error);
+
+    } finally {
 
       setLoading(false);
     }

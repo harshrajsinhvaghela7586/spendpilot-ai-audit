@@ -1,15 +1,30 @@
 import {
   doc,
-  getDoc
+  getDoc,
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
+type AuditPageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+type AuditData = {
+  tool: string;
+  optimizedPlan: string;
+  savings: number;
+  recommendation: string;
+};
+
 export default async function AuditPage({
   params,
-}: any) {
+}: AuditPageProps) {
 
-  const ref = doc(db, "audits", params.id);
+  const { id } = await params;
+
+  const ref = doc(db, "audits", id);
 
   const snapshot = await getDoc(ref);
 
@@ -22,7 +37,7 @@ export default async function AuditPage({
     );
   }
 
-  const data = snapshot.data();
+  const data = snapshot.data() as AuditData;
 
   return (
 
