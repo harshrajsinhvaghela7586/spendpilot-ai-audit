@@ -85,3 +85,36 @@
 - Integrate Firebase backend for lead capture
 - Add AI-generated personalized audit summaries
 - Implement shareable audit report URLs
+
+=======
+
+## Day 4 — 2026-05-23
+
+**Hours worked:** 7
+
+**What I did:**
+- Fully implemented AI pricing comparison dashboard.
+- Integrated real monthly and yearly pricing data for ChatGPT, Claude, Cursor, GitHub Copilot, and Gemini.
+- Updated Spend Form with TypeScript-safe state and lazy localStorage initialization.
+- Integrated Firebase for lead capture and storage.
+- Implemented shareable audit report URLs.
+- Polished UI for both mobile and desktop views.
+- Fixed all TypeScript and ESLint errors.
+- Verified Lighthouse scores: Desktop 99, Mobile 75 → Accessibility 90+ tweak pending.
+- CI pipeline tested and working with Vercel auto-deploy.
+
+**What I learned:**
+- Lazy initialization of state prevents cascading render issues in React 18.
+- Proper TypeScript typing improves developer confidence and CI reliability.
+- Dynamic comparison tables enhance user understanding of plan choices.
+- Firebase backend integration enables real-time shareable reports.
+
+**Blockers / pending:**
+- Minor Lighthouse mobile performance tweaks to reach 80+ performance.
+- Optional accessibility fine-tuning for small mobile buttons and ARIA labels.
+
+**Plan for next day:**
+- Conduct 3 user interviews for real-world feedback.
+- Add AI-generated personalized audit summary using OpenAI / Gemini API.
+- Improve mobile Lighthouse score to 80+ and accessibility to 90+.
+- Prepare final README.md for submission including screenshots and live link.
