@@ -25,6 +25,7 @@
 * Create AI spend input form
 * Start implementing audit recommendation logic
 
+=======
 
 ## Day 2 — 2026-05-21
 
@@ -53,7 +54,9 @@
 * Build audit recommendation engine
 * Add charts and savings visualization
 
- ## Day 3 — 2026-05-22
+=======
+
+## Day 3 — 2026-05-22
 
 **Hours worked:** 7
 
@@ -82,4 +85,3 @@
 - Integrate Firebase backend for lead capture
 - Add AI-generated personalized audit summaries
 - Implement shareable audit report URLs
-- Improve Lighthouse accessibility score above 90
