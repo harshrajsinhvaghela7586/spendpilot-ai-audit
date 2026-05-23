@@ -3,10 +3,12 @@ import Footer from "@/components/layout/footer";
 import Hero from "@/components/audit/hero";
 import SpendForm from "@/components/forms/spend-form";
 import Features from "@/components/audit/features";
+import Comparison from "@/components/audit/comparison";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#020617] text-white overflow-hidden">
+
       <Navbar />
 
       <Hero />
@@ -17,9 +19,12 @@ export default function Home() {
         </div>
       </section>
 
+      <Comparison />
+
       <Features />
 
       <Footer />
+
     </main>
   );
 }
