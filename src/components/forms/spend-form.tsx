@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 
 import { generateAudit } from "@/lib/audit-engine";
 
+import LeadCapture from "@/components/audit/lead-capture";
+
+import { generateAISummary } from "@/lib/ai-summary";
+
+import { exportAuditPDF } from "@/lib/export-pdf";
+
+import { trackAuditEvent } from "@/lib/analytics";
+
 interface AuditResult {
   recommendation: string;
   savings: number;
@@ -14,46 +22,79 @@ interface AuditResult {
 
 export default function SpendForm() {
 
-const [tool, setTool] = useState(() => {
+  const [tool, setTool] = useState(() => {
 
-  if (typeof window === "undefined") {
-    return "ChatGPT";
-  }
+    if (typeof window === "undefined") {
+      return "ChatGPT";
+    }
 
-  return localStorage.getItem("tool") || "ChatGPT";
-});
+    return (
+      localStorage.getItem("tool") ||
+      "ChatGPT"
+    );
+  });
 
-const [monthlySpend, setMonthlySpend] = useState(() => {
+  const [monthlySpend, setMonthlySpend] =
+    useState(() => {
 
-  if (typeof window === "undefined") {
-    return "";
-  }
+      if (typeof window === "undefined") {
+        return "";
+      }
 
-  return localStorage.getItem("monthlySpend") || "";
-});
+      return (
+        localStorage.getItem(
+          "monthlySpend"
+        ) || ""
+      );
+    });
 
-const [teamSize, setTeamSize] = useState(() => {
+  const [teamSize, setTeamSize] =
+    useState(() => {
 
-  if (typeof window === "undefined") {
-    return "";
-  }
+      if (typeof window === "undefined") {
+        return "";
+      }
 
-  return localStorage.getItem("teamSize") || "";
-});
+      return (
+        localStorage.getItem(
+          "teamSize"
+        ) || ""
+      );
+    });
 
-const [result, setResult] = useState<AuditResult | null>(null);
+  const [result, setResult] =
+    useState<AuditResult | null>(null);
 
-useEffect(() => {
+  const [aiSummary, setAiSummary] =
+    useState("");
 
-  localStorage.setItem("tool", tool);
+  const [loadingSummary, setLoadingSummary] =
+    useState(false);
 
-  localStorage.setItem("monthlySpend", monthlySpend);
+  useEffect(() => {
 
-  localStorage.setItem("teamSize", teamSize);
+    localStorage.setItem(
+      "tool",
+      tool
+    );
 
-}, [tool, monthlySpend, teamSize]);
+    localStorage.setItem(
+      "monthlySpend",
+      monthlySpend
+    );
 
-const handleAudit = () => {
+    localStorage.setItem(
+      "teamSize",
+      teamSize
+    );
+
+  }, [
+    tool,
+    monthlySpend,
+    teamSize
+  ]);
+
+  const handleAudit = async () => {
 
     const audit = generateAudit(
       tool,
@@ -62,6 +103,27 @@ const handleAudit = () => {
     );
 
     setResult(audit);
+
+    setLoadingSummary(true);
+
+    const summary =
+      await generateAISummary(
+        tool,
+        Number(monthlySpend),
+        Number(teamSize),
+        audit.optimizedPlan,
+        audit.savings
+      );
+
+    setAiSummary(summary);
+
+    setLoadingSummary(false);
+
+    await trackAuditEvent(
+      tool,
+      Number(monthlySpend),
+      Number(teamSize)
+    );
   };
 
   return (
@@ -75,7 +137,8 @@ const handleAudit = () => {
         </h2>
 
         <p className="text-slate-400 mt-3">
-          Analyze your subscriptions, plans, and usage patterns.
+          Analyze your subscriptions,
+          plans, and usage patterns.
         </p>
 
       </div>
@@ -90,19 +153,31 @@ const handleAudit = () => {
 
           <select
             value={tool}
-            onChange={(e) => setTool(e.target.value)}
+            onChange={(e) =>
+              setTool(e.target.value)
+            }
             className="w-full bg-[#020617] border border-white/10 rounded-2xl px-5 py-4 outline-none"
           >
 
-            <option>ChatGPT</option>
+            <option>
+              ChatGPT
+            </option>
 
-            <option>Claude</option>
+            <option>
+              Claude
+            </option>
 
-            <option>Cursor</option>
+            <option>
+              Cursor
+            </option>
 
-            <option>Copilot</option>
+            <option>
+              Copilot
+            </option>
 
-            <option>Gemini</option>
+            <option>
+              Gemini
+            </option>
 
           </select>
 
@@ -117,7 +192,11 @@ const handleAudit = () => {
           <input
             type="number"
             value={monthlySpend}
-            onChange={(e) => setMonthlySpend(e.target.value)}
+            onChange={(e) =>
+              setMonthlySpend(
+                e.target.value
+              )
+            }
             placeholder="250"
             className="w-full bg-[#020617] border border-white/10 rounded-2xl px-5 py-4 outline-none"
           />
@@ -133,7 +212,11 @@ const handleAudit = () => {
           <input
             type="number"
             value={teamSize}
-            onChange={(e) => setTeamSize(e.target.value)}
+            onChange={(e) =>
+              setTeamSize(
+                e.target.value
+              )
+            }
             placeholder="5"
             className="w-full bg-[#020617] border border-white/10 rounded-2xl px-5 py-4 outline-none"
           />
@@ -153,7 +236,10 @@ const handleAudit = () => {
 
       {result && (
 
-        <div className="mt-8 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6">
+        <div
+          id="audit-report"
+          className="mt-8 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6"
+        >
 
           <h3 className="text-2xl font-bold mb-4">
             Audit Results
@@ -204,20 +290,20 @@ const handleAudit = () => {
             <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
               <p className="text-slate-400 text-sm mb-2">
-                Why This Recommendation?
+                Recommended Plan
               </p>
 
-              <div className="bg-[#020617] rounded-2xl p-5 border border-white/10 mb-3">
+              <h4 className="text-2xl font-bold mt-2">
+                {result.optimizedPlan}
+              </h4>
 
-                <p className="text-slate-400 text-sm">
-                  Recommended Plan
-                </p>
+            </div>
 
-                <h4 className="text-2xl font-bold mt-2">
-                  {result.optimizedPlan}
-                </h4>
+            <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
-              </div>
+              <p className="text-slate-400 text-sm mb-2">
+                Why This Recommendation?
+              </p>
 
               <p className="text-slate-300 leading-relaxed">
                 {result.reason}
@@ -225,7 +311,49 @@ const handleAudit = () => {
 
             </div>
 
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6">
+
+              <h3 className="text-2xl font-bold mb-3">
+                AI Insights
+              </h3>
+
+              {loadingSummary ? (
+
+                <p className="text-slate-400">
+                  Generating AI summary...
+                </p>
+
+              ) : (
+
+                <p className="text-slate-300 leading-relaxed whitespace-pre-line">
+                  {aiSummary}
+                </p>
+
+              )}
+
+            </div>
+
+            <button
+              onClick={exportAuditPDF}
+              className="w-full mt-4 bg-purple-600 hover:bg-purple-700 transition py-4 rounded-2xl font-semibold text-lg"
+            >
+
+              Download Audit PDF
+
+            </button>
+
           </div>
+
+          <LeadCapture
+            result={result}
+            tool={tool}
+            monthlySpend={Number(
+              monthlySpend
+            )}
+            teamSize={Number(
+              teamSize
+            )}
+          />
 
         </div>
 
