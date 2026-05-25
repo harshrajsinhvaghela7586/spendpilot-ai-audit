@@ -19,10 +19,12 @@ export default function Navbar() {
           </div>
         </div>
 
-        <button className="bg-blue-600 hover:bg-blue-700 transition px-5 py-2 rounded-2xl font-medium">
-          Start Audit
-        </button>
-
+        <a
+  href="#audit-form"
+  className="inline-flex items-center justify-center rounded-2xl bg-blue-600 hover:bg-blue-700 transition px-8 py-4 font-semibold"
+>
+  Start Audit
+</a>
       </div>
     </header>
   );

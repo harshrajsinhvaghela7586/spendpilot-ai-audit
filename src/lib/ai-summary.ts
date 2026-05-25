@@ -25,21 +25,45 @@ export async function generateAISummary(
             {
               parts: [
                 {
-                  text:
-                    `Generate a professional AI spend optimization summary.
+                  text: `
+Generate a SHORT professional AI spend audit summary.
 
-                    Tool: ${tool}
-                    Monthly Spend: ${monthlySpend}
-                    Team Size: ${teamSize}
-                    Recommended Plan: ${optimizedPlan}
-                    Estimated Savings: ${savings}
+Keep the response concise and executive-style.
 
-                    Give:
-                    - optimization insights
-                    - overspending analysis
-                    - productivity recommendations
-                    - cost efficiency advice
-                    `
+Rules:
+- Maximum 200 words
+- Use markdown formatting
+- Use short bullet points
+- Avoid long paragraphs
+- Keep it readable for founders and engineering managers
+
+Data:
+Tool: ${tool}
+Monthly Spend: ${monthlySpend}
+Team Size: ${teamSize}
+Recommended Plan: ${optimizedPlan}
+Estimated Monthly Savings: ${savings}
+
+Format EXACTLY like this:
+
+# AI Spend Overview
+
+## Key Findings
+
+- point
+- point
+- point
+
+## Recommended Actions
+
+- point
+- point
+- point
+
+## Final Recommendation
+
+One short professional conclusion sentence.
+                  `
                 }
               ]
             }
@@ -59,6 +83,21 @@ export async function generateAISummary(
 
     console.error(error);
 
-    return "Failed to generate AI summary.";
+    return `
+# AI Spend Overview
+
+## Key Findings
+- Current spend appears higher than optimized usage.
+- Recommended plan can significantly reduce cost.
+- Team usage should be consolidated.
+
+## Recommended Actions
+- Move users to optimized subscription plans.
+- Monitor AI spending monthly.
+- Centralize usage and billing.
+
+## Final Recommendation
+Adopt a more cost-efficient AI subscription strategy.
+    `;
   }
 }

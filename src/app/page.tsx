@@ -13,7 +13,10 @@ export default function Home() {
 
       <Hero />
 
-      <section className="px-6 py-20">
+      <section
+  id="audit-form"
+  className="px-6 py-20"
+>
         <div className="max-w-5xl mx-auto">
           <SpendForm />
         </div>

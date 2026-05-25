@@ -26,13 +26,19 @@ export default function Hero() {
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-10">
 
-          <button className="bg-blue-600 hover:bg-blue-700 transition px-8 py-4 rounded-2xl font-semibold text-lg">
-            Analyze My AI Spend
-          </button>
-
-          <button className="border border-white/10 hover:border-white/20 bg-white/5 transition px-8 py-4 rounded-2xl font-semibold text-lg">
-            View Example Audit
-          </button>
+        <a
+  href="#audit-form"
+  className="bg-blue-600 hover:bg-blue-700 transition px-8 py-4 rounded-2xl font-semibold"
+>
+  Analyze My AI Spend
+</a>
+         
+          <a
+  href="#example-audit"
+  className="bg-white/10 hover:bg-white/20 transition px-8 py-4 rounded-2xl font-semibold"
+>
+  View Example Audit
+</a>
 
         </div>
 

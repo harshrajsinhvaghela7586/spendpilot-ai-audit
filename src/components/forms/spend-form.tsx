@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import ReactMarkdown from "react-markdown";
+
 import { generateAudit } from "@/lib/audit-engine";
 
 import LeadCapture from "@/components/audit/lead-capture";
 
 import { generateAISummary } from "@/lib/ai-summary";
 
-import { exportAuditPDF } from "@/lib/export-pdf";
 
 import { trackAuditEvent } from "@/lib/analytics";
 
@@ -42,9 +43,8 @@ export default function SpendForm() {
       }
 
       return (
-        localStorage.getItem(
-          "monthlySpend"
-        ) || ""
+        localStorage.getItem("monthlySpend") ||
+        ""
       );
     });
 
@@ -56,9 +56,8 @@ export default function SpendForm() {
       }
 
       return (
-        localStorage.getItem(
-          "teamSize"
-        ) || ""
+        localStorage.getItem("teamSize") ||
+        ""
       );
     });
 
@@ -70,6 +69,9 @@ export default function SpendForm() {
 
   const [loadingSummary, setLoadingSummary] =
     useState(false);
+
+  const [auditScore, setAuditScore] =
+    useState(0);
 
   useEffect(() => {
 
@@ -94,6 +96,27 @@ export default function SpendForm() {
     teamSize
   ]);
 
+  const calculateScore = (
+    spend: number,
+    savings: number
+  ) => {
+
+    if (spend <= 0) {
+      return 100;
+    }
+
+    const ratio =
+      savings / spend;
+
+    const score =
+      Math.max(
+        10,
+        100 - Math.round(ratio * 100)
+      );
+
+    return score;
+  };
+
   const handleAudit = async () => {
 
     const audit = generateAudit(
@@ -103,6 +126,14 @@ export default function SpendForm() {
     );
 
     setResult(audit);
+
+    const score =
+      calculateScore(
+        Number(monthlySpend),
+        audit.savings
+      );
+
+    setAuditScore(score);
 
     setLoadingSummary(true);
 
@@ -137,8 +168,7 @@ export default function SpendForm() {
         </h2>
 
         <p className="text-slate-400 mt-3">
-          Analyze your subscriptions,
-          plans, and usage patterns.
+          Analyze your subscriptions, plans, and usage patterns.
         </p>
 
       </div>
@@ -159,25 +189,11 @@ export default function SpendForm() {
             className="w-full bg-[#020617] border border-white/10 rounded-2xl px-5 py-4 outline-none"
           >
 
-            <option>
-              ChatGPT
-            </option>
-
-            <option>
-              Claude
-            </option>
-
-            <option>
-              Cursor
-            </option>
-
-            <option>
-              Copilot
-            </option>
-
-            <option>
-              Gemini
-            </option>
+            <option>ChatGPT</option>
+            <option>Claude</option>
+            <option>Cursor</option>
+            <option>Copilot</option>
+            <option>Gemini</option>
 
           </select>
 
@@ -230,7 +246,9 @@ export default function SpendForm() {
         className="w-full mt-8 bg-blue-600 hover:bg-blue-700 transition py-4 rounded-2xl font-semibold text-lg"
       >
 
-        Generate Audit
+        {loadingSummary
+          ? "Generating AI Insights..."
+          : "Generate Audit"}
 
       </button>
 
@@ -241,51 +259,51 @@ export default function SpendForm() {
           className="mt-8 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6"
         >
 
-          <h3 className="text-2xl font-bold mb-4">
+          <h3 className="text-2xl font-bold mb-6">
             Audit Results
           </h3>
 
-          <div className="space-y-4">
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
 
-            <div>
+            <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
               <p className="text-slate-400 text-sm">
-                Recommendation
+                Monthly Savings
               </p>
 
-              <h4 className="text-xl font-semibold">
-                {result.recommendation}
+              <h4 className="text-3xl font-bold text-green-400 mt-2">
+                ${result.savings}
               </h4>
 
             </div>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
-              <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
+              <p className="text-slate-400 text-sm">
+                Annual Savings
+              </p>
 
-                <p className="text-slate-400 text-sm">
-                  Monthly Savings
-                </p>
-
-                <h4 className="text-3xl font-bold text-green-400 mt-2">
-                  ${result.savings}
-                </h4>
-
-              </div>
-
-              <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
-
-                <p className="text-slate-400 text-sm">
-                  Annual Savings
-                </p>
-
-                <h4 className="text-3xl font-bold text-blue-400 mt-2">
-                  ${result.annualSavings}
-                </h4>
-
-              </div>
+              <h4 className="text-3xl font-bold text-blue-400 mt-2">
+                ${result.annualSavings}
+              </h4>
 
             </div>
+
+            <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
+
+              <p className="text-slate-400 text-sm">
+                Optimization Score
+              </p>
+
+              <h4 className="text-3xl font-bold text-purple-400 mt-2">
+                {auditScore}/100
+              </h4>
+
+            </div>
+
+          </div>
+
+          <div className="space-y-4">
 
             <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
@@ -293,7 +311,7 @@ export default function SpendForm() {
                 Recommended Plan
               </p>
 
-              <h4 className="text-2xl font-bold mt-2">
+              <h4 className="text-2xl font-bold">
                 {result.optimizedPlan}
               </h4>
 
@@ -302,7 +320,7 @@ export default function SpendForm() {
             <div className="bg-[#020617] rounded-2xl p-5 border border-white/10">
 
               <p className="text-slate-400 text-sm mb-2">
-                Why This Recommendation?
+                Recommendation
               </p>
 
               <p className="text-slate-300 leading-relaxed">
@@ -313,46 +331,56 @@ export default function SpendForm() {
 
             <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-6">
 
-              <h3 className="text-2xl font-bold mb-3">
+              <h3 className="text-2xl font-bold mb-5">
                 AI Insights
               </h3>
 
               {loadingSummary ? (
 
-                <p className="text-slate-400">
-                  Generating AI summary...
-                </p>
+                <div className="space-y-3 animate-pulse">
+
+                  <div className="h-4 bg-white/10 rounded" />
+                  <div className="h-4 bg-white/10 rounded w-5/6" />
+                  <div className="h-4 bg-white/10 rounded w-4/6" />
+
+                </div>
 
               ) : (
 
-                <p className="text-slate-300 leading-relaxed whitespace-pre-line">
-                  {aiSummary}
-                </p>
+               <div
+  className="
+    prose
+    prose-invert
+    prose-headings:text-white
+    prose-headings:font-bold
+    prose-p:text-slate-300
+    prose-p:leading-7
+    prose-li:text-slate-300
+    prose-strong:text-white
+    prose-ul:space-y-2
+    prose-h1:text-3xl
+    prose-h2:text-2xl
+    prose-h3:text-xl
+    max-w-none
+  "
+>
 
+  <ReactMarkdown>
+    {aiSummary}
+  </ReactMarkdown>
+
+</div>
               )}
 
             </div>
-
-            <button
-              onClick={exportAuditPDF}
-              className="w-full mt-4 bg-purple-600 hover:bg-purple-700 transition py-4 rounded-2xl font-semibold text-lg"
-            >
-
-              Download Audit PDF
-
-            </button>
 
           </div>
 
           <LeadCapture
             result={result}
             tool={tool}
-            monthlySpend={Number(
-              monthlySpend
-            )}
-            teamSize={Number(
-              teamSize
-            )}
+            monthlySpend={Number(monthlySpend)}
+            teamSize={Number(teamSize)}
           />
 
         </div>
